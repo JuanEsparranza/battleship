@@ -8,6 +8,11 @@ namespace battleship
         {
             try
             {
+                Console.WriteLine("Welcome to Battleship!");
+                Console.WriteLine("\nPress any key to start the game...");
+                Console.ReadKey();
+                Console.Clear();
+
                 Game game = new Game();
                 game.Start();
             }

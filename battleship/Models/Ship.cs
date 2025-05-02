@@ -13,6 +13,8 @@ namespace battleship.Models
         public int Size { get; private set; }
         public int HitsReceived { get; private set; }
         public List<(int, int)> Coordinates { get; private set; }
+        public bool IsSubmarine { get; private set; }
+        public bool IsLeftToRight { get; private set; } // For submarine diagonal direction
 
         public Ship(ShipType type)
         {
@@ -20,17 +22,17 @@ namespace battleship.Models
             Size = GetShipSize(type);
             HitsReceived = 0;
             Coordinates = new List<(int, int)>();
+            IsSubmarine = type == ShipType.Submarine;
+            IsLeftToRight = false; // Default direction, will be set during placement
         }
 
         private int GetShipSize(ShipType type)
         {
             return type switch
             {
-                ShipType.Carrier => 5,
-                ShipType.Battleship => 4,
-                ShipType.Cruiser => 3,
-                ShipType.Submarine => 3,
-                ShipType.Destroyer => 2,
+                ShipType.Destroyer => 4, // 2x2 square
+                ShipType.Submarine => 3, // 3 diagonal cells
+                ShipType.Cruiser => 3,   // 3 consecutive cells
                 _ => throw new ArgumentException("Invalid ship type")
             };
         }
@@ -54,6 +56,14 @@ namespace battleship.Models
         public bool Contains(int row, int col)
         {
             return Coordinates.Contains((row, col));
+        }
+
+        public void SetSubmarineDirection(bool isLeftToRight)
+        {
+            if (Type == ShipType.Submarine)
+            {
+                IsLeftToRight = isLeftToRight;
+            }
         }
     }
 }

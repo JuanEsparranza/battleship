@@ -11,10 +11,8 @@ namespace battleship.Models.Enums
     /// </summary>
     public enum ShipType
     {
-        Carrier,     // 5 cells
-        Battleship,  // 4 cells
-        Cruiser,     // 3 cells
-        Submarine,   // 3 cells
-        Destroyer    // 2 cells
+        Destroyer,  // 2x2 square (4 cells)
+        Submarine,  // 3 diagonal cells
+        Cruiser     // 3 consecutive cells (horizontal or vertical)
     }
 }

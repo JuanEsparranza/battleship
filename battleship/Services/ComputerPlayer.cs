@@ -52,10 +52,17 @@ namespace battleship.Services
             if (!shipSunk)
             {
                 // Add adjacent cells as potential targets
+                // For normal cells:
                 AddPotentialTarget(row - 1, col);  // Up
                 AddPotentialTarget(row + 1, col);  // Down
                 AddPotentialTarget(row, col - 1);  // Left
                 AddPotentialTarget(row, col + 1);  // Right
+
+                // For diagonal directions (to handle submarines):
+                AddPotentialTarget(row - 1, col - 1);  // Up-Left
+                AddPotentialTarget(row - 1, col + 1);  // Up-Right
+                AddPotentialTarget(row + 1, col - 1);  // Down-Left
+                AddPotentialTarget(row + 1, col + 1);  // Down-Right
             }
             else
             {
@@ -87,9 +94,25 @@ namespace battleship.Services
                 {
                     int row = _random.Next(Board.Size);
                     int col = _random.Next(Board.Size);
-                    bool isHorizontal = _random.Next(2) == 0;
 
-                    placed = board.PlaceShip(ship, row, col, isHorizontal);
+                    // Handle different ship types differently
+                    if (shipType == ShipType.Destroyer)
+                    {
+                        // Destroyers are 2x2 squares
+                        placed = board.PlaceShip(ship, row, col, false);
+                    }
+                    else if (shipType == ShipType.Submarine)
+                    {
+                        // Submarines are 3 diagonal cells
+                        bool isLeftToRight = _random.Next(2) == 0;
+                        placed = board.PlaceShip(ship, row, col, false, isLeftToRight);
+                    }
+                    else if (shipType == ShipType.Cruiser)
+                    {
+                        // Cruisers are 3 consecutive cells
+                        bool isHorizontal = _random.Next(2) == 0;
+                        placed = board.PlaceShip(ship, row, col, isHorizontal);
+                    }
                 }
             }
         }

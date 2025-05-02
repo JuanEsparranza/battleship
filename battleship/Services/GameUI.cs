@@ -87,7 +87,7 @@ namespace battleship.Services
             {
                 CellState.Empty => '~',
                 CellState.Ship => hideShips ? '~' : 'S',
-                CellState.Hit => 'X',    // Both ship hits and empty hits show as X
+                CellState.Hit => 'X',
                 CellState.Miss => 'O',
                 _ => '?'
             };
@@ -120,50 +120,86 @@ namespace battleship.Services
             return (row, col);
         }
 
-        public static (int, int, bool) GetShipPlacement(ShipType shipType, int shipSize)
+        public static (int, int, bool, bool) GetShipPlacement(ShipType shipType)
         {
-            Console.WriteLine($"Placing {shipType} (size: {shipSize})");
+            Console.WriteLine($"Placing {shipType}");
 
             int row = -1, col = -1;
             bool isHorizontal = false;
+            bool isLeftToRight = false;
             bool validInput = false;
 
             while (!validInput)
             {
-                Console.Write("Enter starting row (0-9): ");
+                Console.Write($"Enter starting row (0-9) for {shipType}: ");
                 if (!int.TryParse(Console.ReadLine(), out row) || row < 0 || row >= Board.Size)
                 {
                     Console.WriteLine("Invalid row. Please enter a number between 0 and 9.");
                     continue;
                 }
 
-                Console.Write("Enter starting column (0-9): ");
+                Console.Write($"Enter starting column (0-9) for {shipType}: ");
                 if (!int.TryParse(Console.ReadLine(), out col) || col < 0 || col >= Board.Size)
                 {
                     Console.WriteLine("Invalid column. Please enter a number between 0 and 9.");
                     continue;
                 }
 
-                Console.Write("Orientation (h for horizontal, v for vertical): ");
-                string orientation = Console.ReadLine()?.ToLower() ?? "";
-
-                if (orientation == "h")
-                    isHorizontal = true;
-                else if (orientation == "v")
-                    isHorizontal = false;
-                else
+                // Different placement logic based on ship type
+                if (shipType == ShipType.Destroyer)
                 {
-                    Console.WriteLine("Invalid orientation. Please enter 'h' or 'v'.");
-                    continue;
+                    // Destroyers are 2x2 squares, so no orientation needed
+                    Console.WriteLine("Destroyer is a 2x2 square (orientation not needed)");
+                    validInput = true;
                 }
+                else if (shipType == ShipType.Submarine)
+                {
+                    // Submarines are 3 diagonal cells
+                    Console.Write("Direction for submarine (l for left-to-right diagonal \\, r for right-to-left diagonal /): ");
+                    string direction = Console.ReadLine()?.ToLower() ?? "";
 
-                validInput = true;
+                    if (direction == "l")
+                    {
+                        isLeftToRight = true;
+                        validInput = true;
+                    }
+                    else if (direction == "r")
+                    {
+                        isLeftToRight = false;
+                        validInput = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid direction. Please enter 'l' or 'r'.");
+                    }
+                }
+                else if (shipType == ShipType.Cruiser)
+                {
+                    // Cruisers are 3 consecutive cells (horizontal or vertical)
+                    Console.Write("Orientation for cruiser (h for horizontal, v for vertical): ");
+                    string orientation = Console.ReadLine()?.ToLower() ?? "";
+
+                    if (orientation == "h")
+                    {
+                        isHorizontal = true;
+                        validInput = true;
+                    }
+                    else if (orientation == "v")
+                    {
+                        isHorizontal = false;
+                        validInput = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid orientation. Please enter 'h' or 'v'.");
+                    }
+                }
             }
 
-            return (row, col, isHorizontal);
+            return (row, col, isHorizontal, isLeftToRight);
         }
 
-        // Method to display a legend for the game symbols
+        // Method to display a legend for the game symbols and ship shapes
         public static void DisplayLegend()
         {
             Console.WriteLine("\n=== LEGEND ===");
@@ -186,6 +222,11 @@ namespace battleship.Services
             Console.Write("O ");
             Console.ResetColor();
             Console.WriteLine("= Miss");
+
+            Console.WriteLine("\n=== SHIP SHAPES ===");
+            Console.WriteLine("Destroyer: 2x2 square of cells (4 cells total)");
+            Console.WriteLine("Submarine: 3 diagonal cells (left-to-right \\ or right-to-left /)");
+            Console.WriteLine("Cruiser: 3 consecutive cells (horizontal or vertical)");
         }
     }
 }
